@@ -1,0 +1,2 @@
+# mytestingprojects
+AI testing
