@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MJ Vinyl Player</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #ececec; font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #root { display: flex; align-items: center; justify-content: center; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body, button { user-select: none; -webkit-user-select: none; }
+  /* Empty-state hint sits over the stylized cover — invisible until hover */
+  image-slot::part(empty) {
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    transition: opacity 180ms ease;
+    pointer-events: none;
+  }
+  image-slot:hover::part(empty) { opacity: 1; }
+  image-slot[data-over]::part(empty) { opacity: 1; }
+
+  /* Carousel slide-out transitions — rules live in stylesheet, NOT inline,
+     so Chrome can restart them properly when data-playing toggles. */
+  .mj-card-inner {
+    position: relative;
+    transform: translateX(0px);
+    transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mj-card[data-playing="true"] .mj-card-inner {
+    transform: translateX(-60px);
+  }
+
+  .mj-disc-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+    transform: translateX(0px);
+    transition: transform 550ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .mj-card[data-playing="true"] .mj-disc-wrap {
+    transform: translateX(120px);
+  }
+
+  /* Disc rotation driven by a CSS variable so JS rAF can update without
+     fighting React's inline-style commits. */
+  @keyframes mjSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .mj-disc-inner {
+    transform: rotate(var(--mj-rot, 0deg));
+    transform-origin: center center;
+  }
+  /* When playing (and not actively being dragged), spin via CSS
+     keyframes — no per-frame JS, no transition restart cascade. */
+  .mj-card[data-playing="true"]:not([data-disc-drag="true"]) .mj-disc-inner {
+    animation: mjSpin 5s linear infinite;
+  }
+  /* During disc drag, override the animation and use the CSS
+     variable so JS can rotate the disc by the drag delta. */
+  .mj-card[data-disc-drag="true"] .mj-disc-inner {
+    animation: none;
+    transform: rotate(var(--mj-rot, 0deg));
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="image-slot.js"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="player.jsx"></script>
+</body>
+</html>
